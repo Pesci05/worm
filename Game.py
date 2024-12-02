@@ -11,8 +11,11 @@ screen = pygame.display.set_mode([SCREEN_WIDTH,SCREEN_HEIGHT])
 clock = pygame.time.Clock()
 clock.tick(30)
 
+ADD_STAR = pygame.USEREVENT+1
+pygame.time.set_timer(30,ADD_STAR)
+
 class Player(pygame.sprite.Sprite):
-    def __init__(self,):
+    def __init__(self):
         super(Player,self).__init__()
         self.surf = pygame.Surface([75,25])
         self.surf.fill((255,255,255))
@@ -58,7 +61,7 @@ class Shoot(pygame.sprite.Sprite):
             self.kill()
 
 class Star(pygame.sprite.Sprite):
-    def __init__(self,):
+    def __init__(self):
         super(Star,self).__init__()
         self.surf = pygame.surface.Surface([10,10])
         self.surf.fill([255,255,255])
@@ -72,13 +75,14 @@ class Star(pygame.sprite.Sprite):
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.kill()
 
-class Enemy(pygame.surface.Surface):
-    def __init__(self):
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self,x,y):
         super(Enemy,self).__init__()
         self.surf = pygame.surface.Surface([50,25])
-        self.surf.fill([255,255,255])
-        
-    
+        self.surf.fill((255,255,255))
+        self.rect = self.surf.get_rect(
+            center = (x+self.surf.get_width(),15)
+        )
 
 p = Player()
 shoots = pygame.sprite.Group()
@@ -87,10 +91,18 @@ stars = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(p)
 
+x= 10
+for i in range(10):
+    e = Enemy(x+10,x)
+    enemies.add(e)
+    print(e.rect)
+    x = x + e.surf.get_width()/2 
+
+all_sprites.add(enemies)
+
 running = True
 while running:
 
-   
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -100,8 +112,10 @@ while running:
                 running = False
             if event.key == K_SPACE:
                 p.fire()
-        elif event.type == Costanti.ADD_STAR:
-            stars.add(Star())
+        elif event.type == ADD_STAR:
+            s = Star()
+            stars.add(s)
+            
 
     pressedKeys = pygame.key.get_pressed()
     p.update(pressedKeys)
@@ -116,6 +130,8 @@ while running:
     screen.fill([0,0,0])
     for s in all_sprites:
         screen.blit(s.surf, s.rect)
+
+   
     pygame.display.flip()
    
 
