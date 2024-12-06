@@ -2,21 +2,24 @@ import pygame
 import pygame.event
 from pygame.locals import *
 import random
-import Costanti
+from Costanti import *
 pygame.init()
 
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
 screen = pygame.display.set_mode((700,700))
 clock = pygame.time.Clock()
-clock.tick(15)
+clock.tick(30)
 
-ADD_STAR = pygame.USEREVENT+1
-pygame.time.set_timer(30,ADD_STAR)
+MOVEMENT = pygame.USEREVENT+1
+pygame.time.set_timer(MOVEMENT,5)
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player,self).__init__()
+        self.x = 1
+        self.y = 0
         self.surf = pygame.Surface([25,25])
         self.surf.fill((255,255,255))
         self.rect = self.surf.get_rect(
@@ -30,14 +33,21 @@ class Player(pygame.sprite.Sprite):
 
     def update(self,pressedKeys):
         if pressedKeys[K_RIGHT]:
-            self.rect.move_ip(1,0)
+            self.x = 1
+            self.y = 0
         if pressedKeys[K_LEFT]:
-            self.rect.move_ip(-1,0)
+            self.x = -1
+            self.y = 0
         if pressedKeys[K_UP]:
-            self.rect.move_ip(0,-1)
+            self.y = -1
+            self.x = 0
         if pressedKeys[K_DOWN]:
-            self.rect.move_ip(0,1)
+            self.y = 1
+            self.x = 0
         
+        if pressedKeys is not None:
+            self.rect.move_ip(self.x,self.y)
+
         if self.rect.right >= SCREEN_WIDTH:
             self.kill()
             self.dead = True
@@ -69,14 +79,18 @@ while running:
             if event.key == K_ESCAPE:
                 running = False
             
+        elif event.type == MOVEMENT:
+            pressedKeys = pygame.key.get_pressed()
+            p.update(pressedKeys)
+    
+    
     
 
-    pressedKeys = pygame.key.get_pressed()
-    
-    p.update(pressedKeys)
+    screen.fill((0, 0, 0))
     for s in all_sprites:
         screen.blit(s.surf,s.rect)
 
+    
    
     pygame.display.flip()
    
