@@ -3,24 +3,20 @@ import pygame.event
 from pygame.locals import *
 import random
 from Costanti import *
+from tkinter import messagebox
 pygame.init()
 
-SCREEN_WIDTH = 700
-SCREEN_HEIGHT = 700
-screen = pygame.display.set_mode((700,700))
-clock = pygame.time.Clock()
-clock.tick(30)
 
-MOVEMENT = pygame.USEREVENT+1
-pygame.time.set_timer(MOVEMENT,5)
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,width,height):
         super(Player,self).__init__()
+        self.v = False
+        self.points = 0
         self.x = 1
         self.y = 0
-        self.surf = pygame.Surface([25,25])
+        self.surf = pygame.Surface([width,height])
         self.surf.fill((255,255,255))
         self.rect = self.surf.get_rect(
             center=(
@@ -28,8 +24,6 @@ class Player(pygame.sprite.Sprite):
                     (SCREEN_HEIGHT - self.surf.get_height())/2
             )
         )
-        self.dead = False
-        
 
     def update(self,pressedKeys):
         if pressedKeys[K_RIGHT]:
@@ -49,24 +43,36 @@ class Player(pygame.sprite.Sprite):
             self.rect.move_ip(self.x,self.y)
 
         if self.rect.right >= SCREEN_WIDTH:
-            self.kill()
-            self.dead = True
+            pygame.event.post(eventLose)
         if self.rect.left <= 0:
-            self.kill()
-            self.dead = True
+            pygame.event.post(eventLose)
         if self.rect.bottom >= SCREEN_HEIGHT:
-            self.kill()
-            self.dead = True
+            pygame.event.post(eventLose)
         if self.rect.top <= 0:
-            self.kill()
-            self.dead = True
+            pygame.event.post(eventLose)
     
-   
 
-all_sprites = pygame.sprite.Group()
-p = Player()
+class Punto(pygame.sprite.Sprite):
+        def __init__(self):
+            super(Punto,self).__init__()
+            self.surf = pygame.Surface([15,15])
+            self.surf.fill((255,255,255))
+            self.rect = self.surf.get_rect(
+                center=(
+                        random.randint(0,SCREEN_WIDTH),
+                        random.randint(0,SCREEN_HEIGHT)
+                )
+            )
+        
 
-all_sprites.add(p)
+
+player = pygame.sprite.Group()
+width = 25
+height = 25
+p = Player(width,height)
+point = Punto()
+
+player.add(point)
 
 running = True
 while running:
@@ -82,16 +88,31 @@ while running:
         elif event.type == MOVEMENT:
             pressedKeys = pygame.key.get_pressed()
             p.update(pressedKeys)
-    
-    
-    
+        
+        elif event.type == POINT:
+            point = Punto()
+        
+        elif event.type == LOSE:
+            messagebox.showinfo("SNAKE",event.messaggio)
+            pygame.quit()
+
+    if pygame.sprite.collide_rect(point,p):
+        point.kill()
+
+        if p.v is True:
+            height += 10
+        else:
+            width += 10
+        p = Player(width,height)
+
+        
+        pygame.event.post(eventPoint)
+       
 
     screen.fill((0, 0, 0))
-    for s in all_sprites:
-        screen.blit(s.surf,s.rect)
+    screen.blit(p.surf,p.rect)
+    screen.blit(point.surf,point.rect)
 
-    
-   
     pygame.display.flip()
    
 
